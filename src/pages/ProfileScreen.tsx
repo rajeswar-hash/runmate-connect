@@ -16,40 +16,37 @@ const ProfileScreen = () => {
   const [privacy, setPrivacy] = useState<typeof privacyOptions[number]>("Public");
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="h-[100dvh] overflow-y-auto bg-background pb-20">
       {/* Header */}
-      <div className="px-5 pt-14 pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+      <div className="px-4 pt-[max(env(safe-area-inset-top,12px),12px)] pb-4">
+        <div className="flex items-center justify-between mb-5 pt-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Profile</h1>
           <button className="w-10 h-10 rounded-full glass-card flex items-center justify-center btn-press">
             <Settings size={18} className="text-muted-foreground" />
           </button>
         </div>
 
-        {/* Avatar + Name */}
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
-            <span className="font-mono-stats text-xl text-primary">JD</span>
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center shrink-0">
+            <span className="font-mono-stats text-lg text-primary">JD</span>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground">John Doe</h2>
-            <p className="text-sm text-muted-foreground">Running since Jan 2024</p>
+            <h2 className="text-lg font-bold text-foreground">John Doe</h2>
+            <p className="text-xs text-muted-foreground">Running since Jan 2024</p>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="px-5 grid grid-cols-3 gap-3 mb-6">
+      <div className="px-4 grid grid-cols-3 gap-2 mb-4">
         <StatCard label="Total Dist" value="142" unit="km" />
         <StatCard label="Total Runs" value="28" />
         <StatCard label="Avg Pace" value={"5'18\""} unit="/km" />
       </div>
 
-      {/* Privacy */}
-      <div className="px-5 mb-6">
-        <div className="glass-card rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Shield size={16} className="text-primary" />
+      <div className="px-4 mb-4">
+        <div className="glass-card rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Shield size={14} className="text-primary" />
             <span className="font-label text-muted-foreground">Privacy</span>
           </div>
           <div className="flex gap-1 bg-secondary rounded-lg p-1">
@@ -57,10 +54,8 @@ const ProfileScreen = () => {
               <button
                 key={opt}
                 onClick={() => setPrivacy(opt)}
-                className={`flex-1 h-10 rounded-md text-sm font-medium transition-all btn-press ${
-                  privacy === opt
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground"
+                className={`flex-1 h-9 rounded-md text-xs sm:text-sm font-medium transition-all btn-press ${
+                  privacy === opt ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
               >
                 {opt}
@@ -70,9 +65,8 @@ const ProfileScreen = () => {
         </div>
       </div>
 
-      {/* Recent Runs */}
-      <div className="px-5">
-        <h3 className="font-label text-muted-foreground mb-3">Recent Runs</h3>
+      <div className="px-4">
+        <h3 className="font-label text-muted-foreground mb-2">Recent Runs</h3>
         <div className="space-y-2">
           {recentRuns.map((run, i) => (
             <motion.div
@@ -80,21 +74,21 @@ const ProfileScreen = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-lg p-4 flex items-center justify-between btn-press cursor-pointer"
+              className="glass-card rounded-lg p-3 flex items-center justify-between btn-press cursor-pointer"
             >
               <div>
-                <span className="text-sm text-muted-foreground">{run.date}</span>
-                <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="font-mono-stats text-lg text-foreground">{run.distance}</span>
-                  <span className="text-xs text-muted-foreground">km</span>
+                <span className="text-xs text-muted-foreground">{run.date}</span>
+                <div className="flex items-baseline gap-1.5 mt-0.5">
+                  <span className="font-mono-stats text-base text-foreground">{run.distance}</span>
+                  <span className="text-[10px] text-muted-foreground">km</span>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <span className="font-mono-stats text-sm text-foreground">{run.time}</span>
-                  <span className="block text-xs text-muted-foreground">{run.pace}/km</span>
+                  <span className="font-mono-stats text-xs text-foreground">{run.time}</span>
+                  <span className="block text-[10px] text-muted-foreground">{run.pace}/km</span>
                 </div>
-                <ChevronRight size={16} className="text-muted-foreground" />
+                <ChevronRight size={14} className="text-muted-foreground" />
               </div>
             </motion.div>
           ))}

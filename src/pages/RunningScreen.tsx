@@ -14,6 +14,7 @@ const RunningScreen = () => {
   const [distance, setDistance] = useState(0);
   const [routePositions, setRoutePositions] = useState<GeoPosition[]>([]);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const [stopProgress, setStopProgress] = useState(0);
   const prevPosition = useRef<GeoPosition | null>(null);
 
@@ -29,7 +30,7 @@ const RunningScreen = () => {
       setIsRunning(true);
       startTracking();
     }
-  }, [countdown, showCountdown]);
+  }, [countdown, showCountdown, startTracking]);
 
   // Timer
   useEffect(() => {
@@ -41,14 +42,10 @@ const RunningScreen = () => {
   // Track positions and calculate distance
   useEffect(() => {
     if (!isRunning || !position) return;
-
     setRoutePositions((prev) => [...prev, position]);
-
     if (prevPosition.current) {
       const d = haversine(prevPosition.current, position);
-      if (d > 0.002) { // filter GPS noise (>2m)
-        setDistance((prev) => prev + d);
-      }
+      if (d > 0.002) setDistance((prev) => prev + d);
     }
     prevPosition.current = position;
   }, [position, isRunning]);
@@ -62,32 +59,31 @@ const RunningScreen = () => {
   const pace = seconds > 0 && distance > 0 ? Math.floor((seconds / 60) / distance) : 0;
   const paceSeconds = seconds > 0 && distance > 0 ? Math.floor(((seconds / 60) / distance - pace) * 60) : 0;
 
-  const handleStopStart = useCallback(() => {
+  const handleStopDown = useCallback(() => {
     longPressTimer.current = setTimeout(() => {
       stopTracking();
       navigate("/");
     }, 1500);
 
-    const progressInterval = setInterval(() => {
+    progressInterval.current = setInterval(() => {
       setStopProgress((p) => {
-        if (p >= 100) { clearInterval(progressInterval); return 100; }
+        if (p >= 100) {
+          if (progressInterval.current) clearInterval(progressInterval.current);
+          return 100;
+        }
         return p + (100 / 15);
       });
     }, 100);
-
-    const cleanup = () => {
-      if (longPressTimer.current) clearTimeout(longPressTimer.current);
-      clearInterval(progressInterval);
-      setStopProgress(0);
-      window.removeEventListener("mouseup", cleanup);
-      window.removeEventListener("touchend", cleanup);
-    };
-    window.addEventListener("mouseup", cleanup);
-    window.addEventListener("touchend", cleanup);
   }, [stopTracking, navigate]);
 
+  const handleStopUp = useCallback(() => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    if (progressInterval.current) clearInterval(progressInterval.current);
+    setStopProgress(0);
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col bg-background relative">
+    <div className="h-[100dvh] flex flex-col bg-background relative overflow-hidden">
       {/* Countdown */}
       <AnimatePresence>
         {showCountdown && (
@@ -100,29 +96,29 @@ const RunningScreen = () => {
       </AnimatePresence>
 
       {/* Stats */}
-      <div className="px-5 pt-14 pb-4 space-y-4">
-        <div className="text-center">
-          <span className="font-label text-muted-foreground block mb-1">Duration</span>
-          <span className="font-mono-stats text-6xl text-foreground">{formatTime(seconds)}</span>
+      <div className="px-4 pt-[env(safe-area-inset-top,12px)] pb-3 space-y-3 shrink-0">
+        <div className="text-center pt-3">
+          <span className="font-label text-muted-foreground block mb-0.5">Duration</span>
+          <span className="font-mono-stats text-5xl sm:text-6xl text-foreground">{formatTime(seconds)}</span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="glass-card rounded-lg p-4 text-center">
-            <span className="font-label text-muted-foreground block mb-1">Distance</span>
-            <span className="font-mono-stats text-3xl text-foreground">{distance.toFixed(2)}</span>
-            <span className="text-sm text-muted-foreground ml-1">km</span>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="glass-card rounded-lg p-3 text-center">
+            <span className="font-label text-muted-foreground block mb-0.5">Distance</span>
+            <span className="font-mono-stats text-2xl sm:text-3xl text-foreground">{distance.toFixed(2)}</span>
+            <span className="text-xs text-muted-foreground ml-1">km</span>
           </div>
-          <div className="glass-card rounded-lg p-4 text-center">
-            <span className="font-label text-muted-foreground block mb-1">Pace</span>
-            <span className="font-mono-stats text-3xl text-foreground">
+          <div className="glass-card rounded-lg p-3 text-center">
+            <span className="font-label text-muted-foreground block mb-0.5">Pace</span>
+            <span className="font-mono-stats text-2xl sm:text-3xl text-foreground">
               {pace}'{paceSeconds.toString().padStart(2, "0")}"
             </span>
-            <span className="text-sm text-muted-foreground ml-1">/km</span>
+            <span className="text-xs text-muted-foreground ml-1">/km</span>
           </div>
         </div>
       </div>
 
       {/* Map */}
-      <div className="flex-1 mx-5 rounded-lg overflow-hidden relative mb-4 min-h-[200px]">
+      <div className="flex-1 mx-4 rounded-lg overflow-hidden relative min-h-0">
         {position ? (
           <RunMap center={position} zoom={16} showUserMarker followUser routePositions={routePositions} />
         ) : (
@@ -133,25 +129,42 @@ const RunningScreen = () => {
       </div>
 
       {/* Controls */}
-      <div className="px-5 pb-10 flex items-center justify-center gap-6">
-        <motion.button whileTap={{ scale: 0.96 }} onClick={() => setIsRunning(!isRunning)} className="w-16 h-16 rounded-full glass-card flex items-center justify-center btn-press">
-          {isRunning ? <Pause size={28} className="text-foreground" /> : <Play size={28} className="text-foreground" />}
+      <div className="px-4 py-5 flex items-center justify-center gap-6 shrink-0 pb-[max(env(safe-area-inset-bottom,20px),20px)]">
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          onClick={() => setIsRunning(!isRunning)}
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full glass-card flex items-center justify-center btn-press"
+        >
+          {isRunning ? <Pause size={24} className="text-foreground" /> : <Play size={24} className="text-foreground" />}
         </motion.button>
         <div className="relative">
-          <motion.button onMouseDown={handleStopStart} onTouchStart={handleStopStart} whileTap={{ scale: 0.96 }} className="w-20 h-20 rounded-full bg-destructive flex items-center justify-center btn-press relative overflow-hidden">
+          <motion.button
+            onMouseDown={handleStopDown}
+            onMouseUp={handleStopUp}
+            onMouseLeave={handleStopUp}
+            onTouchStart={handleStopDown}
+            onTouchEnd={handleStopUp}
+            whileTap={{ scale: 0.96 }}
+            className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-destructive flex items-center justify-center btn-press relative overflow-hidden"
+            style={{ width: 72, height: 72 }}
+          >
             {stopProgress > 0 && (
-              <div className="absolute inset-0 bg-foreground/20 rounded-full" style={{ clipPath: `polygon(50% 50%, 50% 0%, ${stopProgress > 25 ? '100% 0%' : `${50 + stopProgress * 2}% 0%`}, ${stopProgress > 50 ? '100% 100%' : stopProgress > 25 ? `100% ${(stopProgress - 25) * 4}%` : '50% 0%'}, ${stopProgress > 75 ? '0% 100%' : stopProgress > 50 ? `${100 - (stopProgress - 50) * 4}% 100%` : '50% 0%'}, ${stopProgress > 75 ? `0% ${100 - (stopProgress - 75) * 4}%` : '50% 0%'}, 50% 0%)` }} />
+              <div
+                className="absolute inset-1 rounded-full border-4 border-foreground/40"
+                style={{
+                  background: `conic-gradient(hsl(var(--foreground) / 0.3) ${stopProgress * 3.6}deg, transparent 0deg)`,
+                }}
+              />
             )}
-            <Square size={28} className="text-foreground relative z-10" />
+            <Square size={24} className="text-foreground relative z-10" />
           </motion.button>
-          <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Hold to stop</span>
+          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Hold to stop</span>
         </div>
       </div>
     </div>
   );
 };
 
-// Haversine distance in km
 function haversine(a: GeoPosition, b: GeoPosition): number {
   const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;

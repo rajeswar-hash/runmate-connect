@@ -41,6 +41,7 @@ const RunMap = memo(({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const labelsLayerRef = useRef<L.TileLayer | null>(null);
   const userMarkerRef = useRef<L.CircleMarker | null>(null);
   const pulseRef = useRef<L.CircleMarker | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);

@@ -16,25 +16,23 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center px-6 py-12 bg-background">
+    <div className="h-[100dvh] flex flex-col justify-center px-5 bg-background">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-sm mx-auto"
       >
-        {/* Logo */}
-        <div className="mb-12">
-          <h1 className="font-mono-stats text-4xl text-primary mb-2">RunMate</h1>
-          <p className="text-muted-foreground text-lg">Ready to move?</p>
+        <div className="mb-10">
+          <h1 className="font-mono-stats text-3xl sm:text-4xl text-primary mb-2">RunMate</h1>
+          <p className="text-muted-foreground text-base sm:text-lg">Ready to move?</p>
         </div>
 
-        {/* Google Button */}
         <button
           onClick={() => navigate("/")}
-          className="w-full h-14 rounded-lg bg-foreground text-background font-semibold flex items-center justify-center gap-3 btn-press mb-4"
+          className="w-full h-12 sm:h-14 rounded-lg bg-foreground text-background font-semibold text-sm flex items-center justify-center gap-3 btn-press mb-4"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24">
+          <svg width="18" height="18" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -43,64 +41,39 @@ const LoginScreen = () => {
           Continue with Google
         </button>
 
-        <div className="flex items-center gap-3 my-6">
+        <div className="flex items-center gap-3 my-5">
           <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-muted-foreground uppercase tracking-widest">or</span>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-widest">or</span>
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        {/* Email Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2.5">
           {isSignUp && (
             <div className="relative">
-              <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full h-14 rounded-lg bg-secondary pl-12 pr-4 text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
-              />
+              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input type="text" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)}
+                className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" />
             </div>
           )}
           <div className="relative">
-            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-14 rounded-lg bg-secondary pl-12 pr-4 text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
-            />
+            <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" />
           </div>
           <div className="relative">
-            <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-14 rounded-lg bg-secondary pl-12 pr-4 text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
-            />
+            <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
+              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" />
           </div>
-
-          <button
-            type="submit"
-            className="w-full h-14 rounded-full bg-primary text-primary-foreground font-bold text-lg flex items-center justify-center gap-2 btn-press active-pulse"
-          >
+          <button type="submit" className="w-full h-12 sm:h-14 rounded-full bg-primary text-primary-foreground font-bold text-base flex items-center justify-center gap-2 btn-press active-pulse">
             {isSignUp ? "Create Account" : "Sign In"}
-            <ArrowRight size={20} />
+            <ArrowRight size={18} />
           </button>
         </form>
 
-        <p className="text-center mt-6 text-muted-foreground">
+        <p className="text-center mt-5 text-sm text-muted-foreground">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-primary font-medium"
-          >
-            {isSignUp ? "Sign In" : "Sign Up"}
-          </button>
+          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium">{isSignUp ? "Sign In" : "Sign Up"}</button>
         </p>
       </motion.div>
     </div>

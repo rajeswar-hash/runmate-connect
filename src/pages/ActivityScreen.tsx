@@ -12,23 +12,21 @@ const runs = [
 
 const ActivityScreen = () => {
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="px-5 pt-14 pb-6">
-        <h1 className="text-2xl font-bold text-foreground">Activity</h1>
-        <p className="text-sm text-muted-foreground mt-1">March 2026</p>
+    <div className="h-[100dvh] overflow-y-auto bg-background pb-20">
+      <div className="px-4 pt-[max(env(safe-area-inset-top,12px),12px)] pb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground pt-2">Activity</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">March 2026</p>
       </div>
 
-      {/* Summary */}
-      <div className="px-5 grid grid-cols-2 gap-3 mb-6">
+      <div className="px-4 grid grid-cols-2 gap-2 mb-4">
         <StatCard label="This Month" value="28.3" unit="km" />
         <StatCard label="Runs" value="5" />
       </div>
 
-      {/* Weekly bar chart mockup */}
-      <div className="px-5 mb-6">
-        <div className="glass-card rounded-lg p-4">
-          <span className="font-label text-muted-foreground block mb-4">Weekly Distance</span>
-          <div className="flex items-end justify-between gap-2 h-24">
+      <div className="px-4 mb-4">
+        <div className="glass-card rounded-lg p-3">
+          <span className="font-label text-muted-foreground block mb-3">Weekly Distance</span>
+          <div className="flex items-end justify-between gap-1.5 h-20">
             {[3.2, 5.1, 0, 8.4, 4.1, 6.7, 5.2].map((val, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
                 <motion.div
@@ -47,9 +45,8 @@ const ActivityScreen = () => {
         </div>
       </div>
 
-      {/* Run List */}
-      <div className="px-5">
-        <h3 className="font-label text-muted-foreground mb-3">All Runs</h3>
+      <div className="px-4">
+        <h3 className="font-label text-muted-foreground mb-2">All Runs</h3>
         <div className="space-y-2">
           {runs.map((run, i) => (
             <motion.div
@@ -57,22 +54,22 @@ const ActivityScreen = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-lg p-4 btn-press cursor-pointer"
+              className="glass-card rounded-lg p-3 btn-press cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-muted-foreground">{run.date}</span>
-                  <div className="flex items-baseline gap-3 mt-1">
-                    <span className="font-mono-stats text-xl text-foreground">{run.distance}<span className="text-xs text-muted-foreground ml-1">km</span></span>
-                    <span className="font-mono-stats text-sm text-muted-foreground">{run.time}</span>
+                  <span className="text-[10px] text-muted-foreground">{run.date}</span>
+                  <div className="flex items-baseline gap-2 mt-0.5">
+                    <span className="font-mono-stats text-lg text-foreground">{run.distance}<span className="text-[10px] text-muted-foreground ml-1">km</span></span>
+                    <span className="font-mono-stats text-xs text-muted-foreground">{run.time}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className="text-right">
-                    <span className="font-mono-stats text-sm text-primary">{run.pace}</span>
-                    <span className="block text-[10px] text-muted-foreground">{run.calories} kcal</span>
+                    <span className="font-mono-stats text-xs text-primary">{run.pace}</span>
+                    <span className="block text-[9px] text-muted-foreground">{run.calories} kcal</span>
                   </div>
-                  <ChevronRight size={16} className="text-muted-foreground" />
+                  <ChevronRight size={14} className="text-muted-foreground" />
                 </div>
               </div>
             </motion.div>

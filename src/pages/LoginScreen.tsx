@@ -1,18 +1,60 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 
 const LoginScreen = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) navigate("/", { replace: true });
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/");
+    setLoading(true);
+
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: window.location.origin,
+          },
+        });
+        if (error) throw error;
+        toast.success("Account created! Check your email to verify.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Welcome back!");
+        navigate("/");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) toast.error(error.message);
   };
 
   return (
@@ -25,11 +67,13 @@ const LoginScreen = () => {
       >
         <div className="mb-10">
           <h1 className="font-mono-stats text-3xl sm:text-4xl text-primary mb-2">RunMate</h1>
-          <p className="text-muted-foreground text-base sm:text-lg">Ready to move?</p>
+          <p className="text-muted-foreground text-base sm:text-lg">
+            {isSignUp ? "Create your account" : "Ready to move?"}
+          </p>
         </div>
 
         <button
-          onClick={() => navigate("/")}
+          onClick={handleGoogleLogin}
           className="w-full h-12 sm:h-14 rounded-lg bg-foreground text-background font-semibold text-sm flex items-center justify-center gap-3 btn-press mb-4"
         >
           <svg width="18" height="18" viewBox="0 0 24 24">
@@ -52,28 +96,35 @@ const LoginScreen = () => {
             <div className="relative">
               <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input type="text" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)}
-                className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" />
+                className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" required />
             </div>
           )}
           <div className="relative">
             <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" />
+              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" required />
           </div>
           <div className="relative">
             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" />
+              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" required minLength={6} />
           </div>
-          <button type="submit" className="w-full h-12 sm:h-14 rounded-full bg-primary text-primary-foreground font-bold text-base flex items-center justify-center gap-2 btn-press active-pulse">
-            {isSignUp ? "Create Account" : "Sign In"}
-            <ArrowRight size={18} />
+          <button type="submit" disabled={loading}
+            className="w-full h-12 sm:h-14 rounded-full bg-primary text-primary-foreground font-bold text-base flex items-center justify-center gap-2 btn-press active-pulse disabled:opacity-50">
+            {loading ? <Loader2 size={18} className="animate-spin" /> : (
+              <>
+                {isSignUp ? "Create Account" : "Sign In"}
+                <ArrowRight size={18} />
+              </>
+            )}
           </button>
         </form>
 
         <p className="text-center mt-5 text-sm text-muted-foreground">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium">{isSignUp ? "Sign In" : "Sign Up"}</button>
+          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium">
+            {isSignUp ? "Sign In" : "Sign Up"}
+          </button>
         </p>
       </motion.div>
     </div>

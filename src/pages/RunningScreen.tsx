@@ -10,7 +10,7 @@ const RunningScreen = () => {
   const [countdown, setCountdown] = useState(3);
   const [showCountdown, setShowCountdown] = useState(true);
   const [distance, setDistance] = useState(0);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [stopProgress, setStopProgress] = useState(0);
 
   // Countdown

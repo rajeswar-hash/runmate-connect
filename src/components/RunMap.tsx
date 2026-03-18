@@ -5,6 +5,7 @@ import { Layers } from "lucide-react";
 
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const SATELLITE_TILE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+const LABELS_TILE = "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png";
 const VOLT = "#DFFF00";
 const BLUE = "#0066FF";
 
@@ -40,6 +41,7 @@ const RunMap = memo(({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const labelsLayerRef = useRef<L.TileLayer | null>(null);
   const userMarkerRef = useRef<L.CircleMarker | null>(null);
   const pulseRef = useRef<L.CircleMarker | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
@@ -79,8 +81,15 @@ const RunMap = memo(({
     const map = mapRef.current;
     if (!map) return;
     if (tileLayerRef.current) map.removeLayer(tileLayerRef.current);
+    if (labelsLayerRef.current) map.removeLayer(labelsLayerRef.current);
+    labelsLayerRef.current = null;
+
     const url = mode === "satellite" ? SATELLITE_TILE : DARK_TILE;
     tileLayerRef.current = L.tileLayer(url, { maxZoom: 19 }).addTo(map);
+
+    if (mode === "satellite") {
+      labelsLayerRef.current = L.tileLayer(LABELS_TILE, { maxZoom: 19, pane: "overlayPane" }).addTo(map);
+    }
   }, [mode]);
 
   // Follow user

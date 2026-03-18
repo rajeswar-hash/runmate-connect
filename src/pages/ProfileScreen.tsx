@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import StatCard from "@/components/StatCard";
-import { Settings, Shield, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { Settings, Shield, ChevronRight, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const recentRuns = [
   { id: 1, date: "Today", distance: "5.23", time: "27:14", pace: "5'12\"" },
@@ -14,6 +17,34 @@ const privacyOptions = ["Public", "Friends", "Private"] as const;
 
 const ProfileScreen = () => {
   const [privacy, setPrivacy] = useState<typeof privacyOptions[number]>("Public");
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<{ full_name: string | null; bio: string | null; avatar_url: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("full_name, bio, avatar_url")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setProfile(data);
+      });
+  }, [user]);
+
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email || "Runner";
+  const initials = displayName
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="h-[100dvh] overflow-y-auto bg-background pb-20">
@@ -21,18 +52,26 @@ const ProfileScreen = () => {
       <div className="px-4 pt-[max(env(safe-area-inset-top,12px),12px)] pb-4">
         <div className="flex items-center justify-between mb-5 pt-2">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Profile</h1>
-          <button className="w-10 h-10 rounded-full glass-card flex items-center justify-center btn-press">
-            <Settings size={18} className="text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSignOut}
+              className="w-10 h-10 rounded-full glass-card flex items-center justify-center btn-press"
+            >
+              <LogOut size={18} className="text-destructive" />
+            </button>
+            <button className="w-10 h-10 rounded-full glass-card flex items-center justify-center btn-press">
+              <Settings size={18} className="text-muted-foreground" />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center shrink-0">
-            <span className="font-mono-stats text-lg text-primary">JD</span>
+            <span className="font-mono-stats text-lg text-primary">{initials}</span>
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">John Doe</h2>
-            <p className="text-xs text-muted-foreground">Running since Jan 2024</p>
+            <h2 className="text-lg font-bold text-foreground">{displayName}</h2>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
         </div>
       </div>

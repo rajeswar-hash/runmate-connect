@@ -39,7 +39,7 @@ const HomeScreen = () => {
         <div className="grid grid-cols-3 gap-3">
           <StatCard label="This Week" value="12.4" unit="km" />
           <StatCard label="Runs" value="3" />
-          <StatCard label="Avg Pace" value="5'24\"" unit="/km" />
+          <StatCard label="Avg Pace" value={"5'24\""} unit="/km" />
         </div>
 
         {/* Start Button */}

@@ -113,7 +113,7 @@ const RunMap = ({
     }
     if (routePositions.length > 1) {
       polylineRef.current = L.polyline(
-        routePositions.map((p) => [p.lat, p.lng]),
+        routePositions.map((p): L.LatLngTuple => [p.lat, p.lng]),
         { color: VOLT, weight: 4, opacity: 0.9, smoothFactor: 1 }
       ).addTo(mapInstance.current);
     }

@@ -1,10 +1,14 @@
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, memo, useState } from "react";
 import L from "leaflet";
 import type { GeoPosition } from "@/hooks/useGeolocation";
+import { Layers } from "lucide-react";
 
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const SATELLITE_TILE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const VOLT = "#DFFF00";
 const BLUE = "#0066FF";
+
+type MapMode = "dark" | "satellite";
 
 interface RunMapProps {
   center: GeoPosition;
@@ -20,6 +24,7 @@ interface RunMapProps {
   showUserMarker?: boolean;
   className?: string;
   followUser?: boolean;
+  showModeToggle?: boolean;
 }
 
 const RunMap = memo(({
@@ -30,13 +35,16 @@ const RunMap = memo(({
   showUserMarker = true,
   className = "",
   followUser = false,
+  showModeToggle = true,
 }: RunMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const userMarkerRef = useRef<L.CircleMarker | null>(null);
   const pulseRef = useRef<L.CircleMarker | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
   const otherMarkersRef = useRef<L.CircleMarker[]>([]);
+  const [mode, setMode] = useState<MapMode>("dark");
 
   // Init map
   useEffect(() => {
@@ -50,7 +58,7 @@ const RunMap = memo(({
       attributionControl: false,
     });
 
-    L.tileLayer(DARK_TILE, { maxZoom: 19 }).addTo(map);
+    tileLayerRef.current = L.tileLayer(DARK_TILE, { maxZoom: 19 }).addTo(map);
     mapRef.current = map;
 
     setTimeout(() => map.invalidateSize(), 150);
@@ -58,12 +66,22 @@ const RunMap = memo(({
     return () => {
       map.remove();
       mapRef.current = null;
+      tileLayerRef.current = null;
       userMarkerRef.current = null;
       pulseRef.current = null;
       polylineRef.current = null;
       otherMarkersRef.current = [];
     };
   }, []);
+
+  // Switch tile layer on mode change
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (tileLayerRef.current) map.removeLayer(tileLayerRef.current);
+    const url = mode === "satellite" ? SATELLITE_TILE : DARK_TILE;
+    tileLayerRef.current = L.tileLayer(url, { maxZoom: 19 }).addTo(map);
+  }, [mode]);
 
   // Follow user
   useEffect(() => {
@@ -127,7 +145,20 @@ const RunMap = memo(({
     });
   }, [markers]);
 
-  return <div ref={containerRef} className={`w-full h-full ${className}`} style={{ minHeight: 200 }} />;
+  return (
+    <div className={`relative w-full h-full ${className}`} style={{ minHeight: 200 }}>
+      <div ref={containerRef} className="w-full h-full" />
+      {showModeToggle && (
+        <button
+          onClick={() => setMode((m) => (m === "dark" ? "satellite" : "dark"))}
+          className="absolute bottom-4 left-4 z-[1000] glass-card rounded-full w-10 h-10 flex items-center justify-center btn-press"
+          title={mode === "dark" ? "Satellite view" : "Dark view"}
+        >
+          <Layers size={18} className="text-foreground" />
+        </button>
+      )}
+    </div>
+  );
 });
 
 RunMap.displayName = "RunMap";

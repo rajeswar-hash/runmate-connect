@@ -10,6 +10,7 @@ import RunningScreen from "./pages/RunningScreen";
 import NearbyScreen from "./pages/NearbyScreen";
 import ActivityScreen from "./pages/ActivityScreen";
 import ProfileScreen from "./pages/ProfileScreen";
+import SettingsScreen from "./pages/SettingsScreen";
 import ChatScreen from "./pages/ChatScreen";
 import LoginScreen from "./pages/LoginScreen";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,7 @@ const AppRoutes = () => (
       <Route path="/nearby" element={<ProtectedRoute><NearbyScreen /></ProtectedRoute>} />
       <Route path="/activity" element={<ProtectedRoute><ActivityScreen /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
       <Route path="/chat/:id" element={<ProtectedRoute><ChatScreen /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

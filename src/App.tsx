@@ -10,6 +10,7 @@ import RunningScreen from "./pages/RunningScreen";
 import NearbyScreen from "./pages/NearbyScreen";
 import ActivityScreen from "./pages/ActivityScreen";
 import ProfileScreen from "./pages/ProfileScreen";
+import SettingsScreen from "./pages/SettingsScreen";
 import ChatScreen from "./pages/ChatScreen";
 import LoginScreen from "./pages/LoginScreen";
 import NotFound from "./pages/NotFound";

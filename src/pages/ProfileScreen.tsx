@@ -6,12 +6,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-const recentRuns = [
-  { id: 1, date: "Today", distance: "5.23", time: "27:14", pace: "5'12\"" },
-  { id: 2, date: "Yesterday", distance: "3.81", time: "20:45", pace: "5'27\"" },
-  { id: 3, date: "Mar 15", distance: "8.42", time: "43:18", pace: "5'08\"" },
-  { id: 4, date: "Mar 13", distance: "4.10", time: "22:30", pace: "5'29\"" },
-];
 
 const privacyOptions = ["Public", "Friends", "Private"] as const;
 

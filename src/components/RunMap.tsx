@@ -62,7 +62,7 @@ const RunMap = memo(({
       attributionControl: false,
     });
 
-    tileLayerRef.current = L.tileLayer(DARK_TILE, { maxZoom: 19 }).addTo(map);
+    tileLayerRef.current = L.tileLayer(DARK_TILE, { maxZoom: DARK_MAX_ZOOM, maxNativeZoom: 18 }).addTo(map);
     mapRef.current = map;
 
     setTimeout(() => map.invalidateSize(), 150);

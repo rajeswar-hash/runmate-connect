@@ -128,7 +128,7 @@ const RunMap = memo(({
     if (routePositions.length > 1) {
       polylineRef.current = L.polyline(
         routePositions.map((p): L.LatLngTuple => [p.lat, p.lng]),
-        { color: VOLT, weight: 4, opacity: 0.9, smoothFactor: 1 }
+        { color: VOLT, weight: 6, opacity: 0.95, smoothFactor: 1.5, lineJoin: "round", lineCap: "round" }
       ).addTo(map);
     }
   }, [routePositions]);

@@ -33,6 +33,7 @@ const AppRoutes = () => (
       <Route path="/nearby" element={<ProtectedRoute><NearbyScreen /></ProtectedRoute>} />
       <Route path="/activity" element={<ProtectedRoute><ActivityScreen /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
       <Route path="/chat/:id" element={<ProtectedRoute><ChatScreen /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

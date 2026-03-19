@@ -73,7 +73,4 @@ function getGreeting() {
   return "evening";
 }
 
-// Need to import Play
-import { Play } from "lucide-react";
-
 export default HomeScreen;

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import StatCard from "@/components/StatCard";
-import { Settings, Shield, ChevronRight, LogOut } from "lucide-react";
+import { Settings, Shield, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";

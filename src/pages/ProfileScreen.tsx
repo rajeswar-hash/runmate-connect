@@ -71,9 +71,9 @@ const ProfileScreen = () => {
       </div>
 
       <div className="px-4 grid grid-cols-3 gap-2 mb-4">
-        <StatCard label="Total Dist" value="142" unit="km" />
-        <StatCard label="Total Runs" value="28" />
-        <StatCard label="Avg Pace" value={"5'18\""} unit="/km" />
+        <StatCard label="Total Dist" value="0" unit="km" />
+        <StatCard label="Total Runs" value="0" />
+        <StatCard label="Avg Pace" value="--" unit="/km" />
       </div>
 
       <div className="px-4 mb-4">

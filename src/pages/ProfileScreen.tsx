@@ -100,31 +100,8 @@ const ProfileScreen = () => {
 
       <div className="px-4">
         <h3 className="font-label text-muted-foreground mb-2">Recent Runs</h3>
-        <div className="space-y-2">
-          {recentRuns.map((run, i) => (
-            <motion.div
-              key={run.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-lg p-3 flex items-center justify-between btn-press cursor-pointer"
-            >
-              <div>
-                <span className="text-xs text-muted-foreground">{run.date}</span>
-                <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="font-mono-stats text-base text-foreground">{run.distance}</span>
-                  <span className="text-[10px] text-muted-foreground">km</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <span className="font-mono-stats text-xs text-foreground">{run.time}</span>
-                  <span className="block text-[10px] text-muted-foreground">{run.pace}/km</span>
-                </div>
-                <ChevronRight size={14} className="text-muted-foreground" />
-              </div>
-            </motion.div>
-          ))}
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <p className="text-sm">No runs yet. Get out there! 🏃</p>
         </div>
       </div>
     </div>

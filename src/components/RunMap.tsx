@@ -86,11 +86,13 @@ const RunMap = memo(({
     if (labelsLayerRef.current) map.removeLayer(labelsLayerRef.current);
     labelsLayerRef.current = null;
 
-    const url = mode === "satellite" ? SATELLITE_TILE : DARK_TILE;
-    tileLayerRef.current = L.tileLayer(url, { maxZoom: 19 }).addTo(map);
+    const isSatellite = mode === "satellite";
+    const url = isSatellite ? SATELLITE_TILE : DARK_TILE;
+    const maxZoom = isSatellite ? SATELLITE_MAX_ZOOM : DARK_MAX_ZOOM;
+    tileLayerRef.current = L.tileLayer(url, { maxZoom, maxNativeZoom: 18 }).addTo(map);
 
-    if (mode === "satellite") {
-      labelsLayerRef.current = L.tileLayer(LABELS_TILE, { maxZoom: 19, pane: "overlayPane" }).addTo(map);
+    if (isSatellite) {
+      labelsLayerRef.current = L.tileLayer(LABELS_TILE, { maxZoom, maxNativeZoom: 18, pane: "overlayPane" }).addTo(map);
     }
   }, [mode]);
 

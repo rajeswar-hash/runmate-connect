@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Flame, TrendingUp, Target } from "lucide-react";
+import { Flame, TrendingUp, Target, Play } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import RunMap from "@/components/RunMap";
 import { useGeolocation } from "@/hooks/useGeolocation";

@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pause, Square, Play } from "lucide-react";
+import { Pause, Square, Play, Flame, Zap, TrendingUp } from "lucide-react";
 import RunMap from "@/components/RunMap";
 import { useGeolocation, type GeoPosition } from "@/hooks/useGeolocation";
+
+const WEIGHT_KG = 70; // default, could come from settings
+const MET_RUNNING = 9.8;
 
 const RunningScreen = () => {
   const navigate = useNavigate();
@@ -17,6 +20,7 @@ const RunningScreen = () => {
   const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const [stopProgress, setStopProgress] = useState(0);
   const prevPosition = useRef<GeoPosition | null>(null);
+  const [steps, setSteps] = useState(0);
 
   const { position, startTracking, stopTracking } = useGeolocation();
 
@@ -45,19 +49,34 @@ const RunningScreen = () => {
     setRoutePositions((prev) => [...prev, position]);
     if (prevPosition.current) {
       const d = haversine(prevPosition.current, position);
-      if (d > 0.002) setDistance((prev) => prev + d);
+      if (d > 0.002) {
+        setDistance((prev) => prev + d);
+        // Estimate steps (~1300 steps per km)
+        setSteps((prev) => prev + Math.round(d * 1300));
+      }
     }
     prevPosition.current = position;
   }, [position, isRunning]);
 
   const formatTime = (s: number) => {
-    const mins = Math.floor(s / 60);
+    const hrs = Math.floor(s / 3600);
+    const mins = Math.floor((s % 3600) / 60);
     const secs = s % 60;
+    if (hrs > 0) return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const pace = seconds > 0 && distance > 0 ? Math.floor((seconds / 60) / distance) : 0;
   const paceSeconds = seconds > 0 && distance > 0 ? Math.floor(((seconds / 60) / distance - pace) * 60) : 0;
+
+  // Calories: MET * weight * hours
+  const calories = Math.round(MET_RUNNING * WEIGHT_KG * (seconds / 3600));
+
+  // Cadence (steps per minute)
+  const cadence = seconds > 0 ? Math.round((steps / seconds) * 60) : 0;
+
+  // Speed km/h
+  const speedKmh = seconds > 0 && distance > 0 ? ((distance / seconds) * 3600) : 0;
 
   const handleStopDown = useCallback(() => {
     longPressTimer.current = setTimeout(() => {
@@ -96,23 +115,50 @@ const RunningScreen = () => {
       </AnimatePresence>
 
       {/* Stats */}
-      <div className="px-4 pt-[env(safe-area-inset-top,12px)] pb-3 space-y-3 shrink-0">
-        <div className="text-center pt-3">
+      <div className="px-4 pt-[env(safe-area-inset-top,12px)] pb-2 space-y-2 shrink-0">
+        <div className="text-center pt-2">
           <span className="font-label text-muted-foreground block mb-0.5">Duration</span>
           <span className="font-mono-stats text-5xl sm:text-6xl text-foreground">{formatTime(seconds)}</span>
         </div>
+
+        {/* Primary stats row */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="glass-card rounded-lg p-3 text-center">
+          <div className="glass-card rounded-lg p-2.5 text-center">
             <span className="font-label text-muted-foreground block mb-0.5">Distance</span>
-            <span className="font-mono-stats text-2xl sm:text-3xl text-foreground">{distance.toFixed(2)}</span>
+            <span className="font-mono-stats text-2xl text-foreground">{distance.toFixed(2)}</span>
             <span className="text-xs text-muted-foreground ml-1">km</span>
           </div>
-          <div className="glass-card rounded-lg p-3 text-center">
+          <div className="glass-card rounded-lg p-2.5 text-center">
             <span className="font-label text-muted-foreground block mb-0.5">Pace</span>
-            <span className="font-mono-stats text-2xl sm:text-3xl text-foreground">
+            <span className="font-mono-stats text-2xl text-foreground">
               {pace}'{paceSeconds.toString().padStart(2, "0")}"
             </span>
             <span className="text-xs text-muted-foreground ml-1">/km</span>
+          </div>
+        </div>
+
+        {/* Secondary stats row */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="glass-card rounded-lg p-2 text-center">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
+              <Flame size={12} className="text-destructive" />
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Cal</span>
+            </div>
+            <span className="font-mono-stats text-lg text-foreground">{calories}</span>
+          </div>
+          <div className="glass-card rounded-lg p-2 text-center">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
+              <Zap size={12} className="text-primary" />
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Cadence</span>
+            </div>
+            <span className="font-mono-stats text-lg text-foreground">{cadence}</span>
+          </div>
+          <div className="glass-card rounded-lg p-2 text-center">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
+              <TrendingUp size={12} className="text-accent" />
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">km/h</span>
+            </div>
+            <span className="font-mono-stats text-lg text-foreground">{speedKmh.toFixed(1)}</span>
           </div>
         </div>
       </div>
@@ -129,7 +175,7 @@ const RunningScreen = () => {
       </div>
 
       {/* Controls */}
-      <div className="px-4 py-5 flex items-center justify-center gap-6 shrink-0 pb-[max(env(safe-area-inset-bottom,20px),20px)]">
+      <div className="px-4 py-4 flex items-center justify-center gap-6 shrink-0 pb-[max(env(safe-area-inset-bottom,16px),16px)]">
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={() => setIsRunning(!isRunning)}

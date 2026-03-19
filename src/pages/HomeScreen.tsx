@@ -1,13 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield } from "lucide-react";
+import { Flame, TrendingUp, Target } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import RunMap from "@/components/RunMap";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HomeScreen = () => {
   const navigate = useNavigate();
   const { position } = useGeolocation();
+  const { user } = useAuth();
+
+  const firstName = (user?.user_metadata?.full_name || "Runner").split(" ")[0];
 
   return (
     <div className="h-[100dvh] flex flex-col bg-background pb-16">
@@ -21,31 +25,55 @@ const HomeScreen = () => {
           </div>
         )}
 
-        {/* Privacy badge */}
-        <div className="absolute top-[max(env(safe-area-inset-top,12px),12px)] right-4 z-[1000] glass-card rounded-full px-3 py-1.5 flex items-center gap-1.5">
-          <Shield size={14} className="text-primary" />
-          <span className="text-xs text-foreground font-medium">Public</span>
+        {/* Greeting overlay */}
+        <div className="absolute top-[max(env(safe-area-inset-top,12px),12px)] left-4 z-[1000]">
+          <div className="glass-card rounded-xl px-4 py-2.5">
+            <p className="text-xs text-muted-foreground">Good {getGreeting()}</p>
+            <p className="text-sm font-bold text-foreground">{firstName} 👋</p>
+          </div>
+        </div>
+
+        {/* Daily goal */}
+        <div className="absolute top-[max(env(safe-area-inset-top,12px),12px)] right-4 z-[1000]">
+          <div className="glass-card rounded-xl px-3 py-2 flex items-center gap-2">
+            <Target size={14} className="text-primary" />
+            <div>
+              <p className="text-[10px] text-muted-foreground">Daily Goal</p>
+              <p className="font-mono-stats text-xs text-foreground">0/5 km</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Bottom Section */}
-      <div className="px-4 pt-4 pb-2 space-y-4 shrink-0">
+      <div className="px-4 pt-3 pb-2 space-y-3 shrink-0">
         <div className="grid grid-cols-3 gap-2">
-          <StatCard label="This Week" value="12.4" unit="km" />
-          <StatCard label="Runs" value="3" />
-          <StatCard label="Avg Pace" value={"5'24\""} unit="/km" />
+          <StatCard label="This Week" value="0" unit="km" icon={<TrendingUp size={14} className="text-primary" />} />
+          <StatCard label="Runs" value="0" icon={<Target size={14} className="text-primary" />} />
+          <StatCard label="Calories" value="0" unit="kcal" icon={<Flame size={14} className="text-destructive" />} />
         </div>
 
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={() => navigate("/running")}
-          className="w-full h-14 sm:h-16 rounded-full bg-primary text-primary-foreground font-bold text-lg sm:text-xl flex items-center justify-center active-pulse btn-press"
+          className="w-full h-14 sm:h-16 rounded-full bg-primary text-primary-foreground font-bold text-lg sm:text-xl flex items-center justify-center active-pulse btn-press gap-2"
         >
+          <Play size={22} />
           Start Run
         </motion.button>
       </div>
     </div>
   );
 };
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  return "evening";
+}
+
+// Need to import Play
+import { Play } from "lucide-react";
 
 export default HomeScreen;

@@ -1,17 +1,11 @@
 import { motion } from "framer-motion";
 import StatCard from "@/components/StatCard";
-import { Settings, Shield, ChevronRight, LogOut } from "lucide-react";
+import { Settings, Shield, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-const recentRuns = [
-  { id: 1, date: "Today", distance: "5.23", time: "27:14", pace: "5'12\"" },
-  { id: 2, date: "Yesterday", distance: "3.81", time: "20:45", pace: "5'27\"" },
-  { id: 3, date: "Mar 15", distance: "8.42", time: "43:18", pace: "5'08\"" },
-  { id: 4, date: "Mar 13", distance: "4.10", time: "22:30", pace: "5'29\"" },
-];
 
 const privacyOptions = ["Public", "Friends", "Private"] as const;
 
@@ -77,9 +71,9 @@ const ProfileScreen = () => {
       </div>
 
       <div className="px-4 grid grid-cols-3 gap-2 mb-4">
-        <StatCard label="Total Dist" value="142" unit="km" />
-        <StatCard label="Total Runs" value="28" />
-        <StatCard label="Avg Pace" value={"5'18\""} unit="/km" />
+        <StatCard label="Total Dist" value="0" unit="km" />
+        <StatCard label="Total Runs" value="0" />
+        <StatCard label="Avg Pace" value="--" unit="/km" />
       </div>
 
       <div className="px-4 mb-4">
@@ -106,31 +100,8 @@ const ProfileScreen = () => {
 
       <div className="px-4">
         <h3 className="font-label text-muted-foreground mb-2">Recent Runs</h3>
-        <div className="space-y-2">
-          {recentRuns.map((run, i) => (
-            <motion.div
-              key={run.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-lg p-3 flex items-center justify-between btn-press cursor-pointer"
-            >
-              <div>
-                <span className="text-xs text-muted-foreground">{run.date}</span>
-                <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="font-mono-stats text-base text-foreground">{run.distance}</span>
-                  <span className="text-[10px] text-muted-foreground">km</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <span className="font-mono-stats text-xs text-foreground">{run.time}</span>
-                  <span className="block text-[10px] text-muted-foreground">{run.pace}/km</span>
-                </div>
-                <ChevronRight size={14} className="text-muted-foreground" />
-              </div>
-            </motion.div>
-          ))}
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <p className="text-sm">No runs yet. Get out there! 🏃</p>
         </div>
       </div>
     </div>

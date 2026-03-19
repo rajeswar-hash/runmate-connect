@@ -6,6 +6,8 @@ import { Layers } from "lucide-react";
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const SATELLITE_TILE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const LABELS_TILE = "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png";
+const DARK_MAX_ZOOM = 20;
+const SATELLITE_MAX_ZOOM = 18;
 const VOLT = "#DFFF00";
 const BLUE = "#0066FF";
 
@@ -60,7 +62,7 @@ const RunMap = memo(({
       attributionControl: false,
     });
 
-    tileLayerRef.current = L.tileLayer(DARK_TILE, { maxZoom: 19 }).addTo(map);
+    tileLayerRef.current = L.tileLayer(DARK_TILE, { maxZoom: DARK_MAX_ZOOM, maxNativeZoom: 18 }).addTo(map);
     mapRef.current = map;
 
     setTimeout(() => map.invalidateSize(), 150);
@@ -84,11 +86,13 @@ const RunMap = memo(({
     if (labelsLayerRef.current) map.removeLayer(labelsLayerRef.current);
     labelsLayerRef.current = null;
 
-    const url = mode === "satellite" ? SATELLITE_TILE : DARK_TILE;
-    tileLayerRef.current = L.tileLayer(url, { maxZoom: 19 }).addTo(map);
+    const isSatellite = mode === "satellite";
+    const url = isSatellite ? SATELLITE_TILE : DARK_TILE;
+    const maxZoom = isSatellite ? SATELLITE_MAX_ZOOM : DARK_MAX_ZOOM;
+    tileLayerRef.current = L.tileLayer(url, { maxZoom, maxNativeZoom: 18 }).addTo(map);
 
-    if (mode === "satellite") {
-      labelsLayerRef.current = L.tileLayer(LABELS_TILE, { maxZoom: 19, pane: "overlayPane" }).addTo(map);
+    if (isSatellite) {
+      labelsLayerRef.current = L.tileLayer(LABELS_TILE, { maxZoom, maxNativeZoom: 18, pane: "overlayPane" }).addTo(map);
     }
   }, [mode]);
 

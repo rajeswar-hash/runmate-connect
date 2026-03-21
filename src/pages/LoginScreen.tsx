@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -24,16 +23,11 @@ const LoginScreen = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: name },
-            emailRedirectTo: window.location.origin,
-          },
+          email, password,
+          options: { data: { full_name: name }, emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
         toast.success("Account created! Check your email to verify.");
@@ -51,31 +45,41 @@ const LoginScreen = () => {
   };
 
   const handleGoogleLogin = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result?.error) toast.error(result.error.message || "Google sign-in failed");
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col justify-center px-5 bg-background">
+    <div className="h-[100dvh] flex flex-col justify-center px-5 bg-background relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl" />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-sm mx-auto"
+        className="w-full max-w-sm mx-auto relative z-10"
       >
-        <div className="mb-10">
-          <h1 className="font-mono-stats text-3xl sm:text-4xl text-primary mb-2">RunMate</h1>
+        {/* Logo */}
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          className="mb-10"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <Zap size={20} className="text-primary-foreground" />
+            </div>
+            <h1 className="font-mono-stats text-3xl sm:text-4xl text-primary">RunMate</h1>
+          </div>
           <p className="text-muted-foreground text-base sm:text-lg">
             {isSignUp ? "Create your account" : "Ready to move?"}
           </p>
-        </div>
+        </motion.div>
 
-        <button
-          onClick={handleGoogleLogin}
-          className="w-full h-12 sm:h-14 rounded-lg bg-foreground text-background font-semibold text-sm flex items-center justify-center gap-3 btn-press mb-4"
-        >
+        <button onClick={handleGoogleLogin}
+          className="w-full h-12 sm:h-14 rounded-xl bg-foreground text-background font-semibold text-sm flex items-center justify-center gap-3 btn-press mb-4 hover:opacity-90 transition-opacity">
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -96,35 +100,30 @@ const LoginScreen = () => {
             <div className="relative">
               <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input type="text" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)}
-                className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" required />
+                className="w-full h-12 rounded-xl bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" required />
             </div>
           )}
           <div className="relative">
             <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" required />
+              className="w-full h-12 rounded-xl bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" required />
           </div>
           <div className="relative">
             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-12 rounded-lg bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary" required minLength={6} />
+              className="w-full h-12 rounded-xl bg-secondary pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" required minLength={6} />
           </div>
           <button type="submit" disabled={loading}
-            className="w-full h-12 sm:h-14 rounded-full bg-primary text-primary-foreground font-bold text-base flex items-center justify-center gap-2 btn-press active-pulse disabled:opacity-50">
+            className="w-full h-12 sm:h-14 rounded-full bg-primary text-primary-foreground font-bold text-base flex items-center justify-center gap-2 btn-press active-pulse disabled:opacity-50 mt-2">
             {loading ? <Loader2 size={18} className="animate-spin" /> : (
-              <>
-                {isSignUp ? "Create Account" : "Sign In"}
-                <ArrowRight size={18} />
-              </>
+              <>{isSignUp ? "Create Account" : "Sign In"}<ArrowRight size={18} /></>
             )}
           </button>
         </form>
 
         <p className="text-center mt-5 text-sm text-muted-foreground">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium">
-            {isSignUp ? "Sign In" : "Sign Up"}
-          </button>
+          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium">{isSignUp ? "Sign In" : "Sign Up"}</button>
         </p>
       </motion.div>
     </div>

@@ -121,7 +121,7 @@ export function useRunHistory() {
     setStats({
       totalDistance, totalRuns: runs.length, totalCalories, totalSteps,
       avgPace, weeklyDistance: weekly, thisMonthDistance, thisMonthCalories,
-      currentStreak, longestRun, fastestPace,
+      currentStreak: streak, longestRun, fastestPace,
     });
   };
 

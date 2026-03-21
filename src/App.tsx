@@ -31,6 +31,7 @@ const AppRoutes = () => (
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
       <Route path="/running" element={<ProtectedRoute><RunningScreen /></ProtectedRoute>} />
+      <Route path="/run-summary" element={<ProtectedRoute><RunSummaryScreen /></ProtectedRoute>} />
       <Route path="/nearby" element={<ProtectedRoute><NearbyScreen /></ProtectedRoute>} />
       <Route path="/activity" element={<ProtectedRoute><ActivityScreen /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />

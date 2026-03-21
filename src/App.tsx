@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import BottomNav from "@/components/BottomNav";
 import HomeScreen from "./pages/HomeScreen";
 import RunningScreen from "./pages/RunningScreen";
+import RunSummaryScreen from "./pages/RunSummaryScreen";
 import NearbyScreen from "./pages/NearbyScreen";
 import ActivityScreen from "./pages/ActivityScreen";
 import ProfileScreen from "./pages/ProfileScreen";
@@ -30,6 +31,7 @@ const AppRoutes = () => (
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
       <Route path="/running" element={<ProtectedRoute><RunningScreen /></ProtectedRoute>} />
+      <Route path="/run-summary" element={<ProtectedRoute><RunSummaryScreen /></ProtectedRoute>} />
       <Route path="/nearby" element={<ProtectedRoute><NearbyScreen /></ProtectedRoute>} />
       <Route path="/activity" element={<ProtectedRoute><ActivityScreen /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pause, Square, Play, Flame, Zap, TrendingUp } from "lucide-react";
+import { Pause, Square, Play, Flame, Zap, TrendingUp, Lock } from "lucide-react";
 import RunMap from "@/components/RunMap";
 import { useGeolocation, type GeoPosition } from "@/hooks/useGeolocation";
+import { useRunHistory } from "@/hooks/useRunHistory";
 
-const WEIGHT_KG = 70; // default, could come from settings
+const WEIGHT_KG = 70;
 const MET_RUNNING = 9.8;
 
 const RunningScreen = () => {
@@ -21,6 +22,9 @@ const RunningScreen = () => {
   const [stopProgress, setStopProgress] = useState(0);
   const prevPosition = useRef<GeoPosition | null>(null);
   const [steps, setSteps] = useState(0);
+  const [splitTimes, setSplitTimes] = useState<number[]>([]);
+  const lastKm = useRef(0);
+  const { saveRun } = useRunHistory();
 
   const { position, startTracking, stopTracking } = useGeolocation();
 
@@ -50,8 +54,15 @@ const RunningScreen = () => {
     if (prevPosition.current) {
       const d = haversine(prevPosition.current, position);
       if (d > 0.002) {
-        setDistance((prev) => prev + d);
-        // Estimate steps (~1300 steps per km)
+        setDistance((prev) => {
+          const newDist = prev + d;
+          // Track km splits
+          if (Math.floor(newDist) > lastKm.current) {
+            lastKm.current = Math.floor(newDist);
+            setSplitTimes((prev) => [...prev, seconds]);
+          }
+          return newDist;
+        });
         setSteps((prev) => prev + Math.round(d * 1300));
       }
     }
@@ -68,22 +79,31 @@ const RunningScreen = () => {
 
   const pace = seconds > 0 && distance > 0 ? Math.floor((seconds / 60) / distance) : 0;
   const paceSeconds = seconds > 0 && distance > 0 ? Math.floor(((seconds / 60) / distance - pace) * 60) : 0;
-
-  // Calories: MET * weight * hours
   const calories = Math.round(MET_RUNNING * WEIGHT_KG * (seconds / 3600));
-
-  // Cadence (steps per minute)
   const cadence = seconds > 0 ? Math.round((steps / seconds) * 60) : 0;
-
-  // Speed km/h
   const speedKmh = seconds > 0 && distance > 0 ? ((distance / seconds) * 3600) : 0;
+
+  const handleFinishRun = useCallback(async () => {
+    stopTracking();
+    const avgPace = distance > 0 ? (seconds / 60) / distance : 0;
+    await saveRun({
+      distance_km: Math.round(distance * 1000) / 1000,
+      duration_seconds: seconds,
+      calories,
+      steps,
+      avg_pace_min_per_km: Math.round(avgPace * 100) / 100,
+      avg_speed_kmh: Math.round(speedKmh * 100) / 100,
+      route: routePositions,
+    });
+    navigate("/run-summary", {
+      state: { distance, seconds, calories, steps, pace, paceSeconds, speedKmh, routePositions },
+    });
+  }, [stopTracking, navigate, distance, seconds, calories, steps, pace, paceSeconds, speedKmh, routePositions, saveRun]);
 
   const handleStopDown = useCallback(() => {
     longPressTimer.current = setTimeout(() => {
-      stopTracking();
-      navigate("/");
+      handleFinishRun();
     }, 1500);
-
     progressInterval.current = setInterval(() => {
       setStopProgress((p) => {
         if (p >= 100) {
@@ -93,7 +113,7 @@ const RunningScreen = () => {
         return p + (100 / 15);
       });
     }, 100);
-  }, [stopTracking, navigate]);
+  }, [handleFinishRun]);
 
   const handleStopUp = useCallback(() => {
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
@@ -107,28 +127,36 @@ const RunningScreen = () => {
       <AnimatePresence>
         {showCountdown && (
           <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-center justify-center bg-background">
-            <motion.span key={countdown} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 1.5, opacity: 0 }} className="font-mono-stats text-8xl text-primary">
-              {countdown === 0 ? "GO" : countdown}
-            </motion.span>
+            <motion.div className="flex flex-col items-center gap-4">
+              <motion.span key={countdown} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 1.5, opacity: 0 }} className="font-mono-stats text-8xl text-primary">
+                {countdown === 0 ? "GO" : countdown}
+              </motion.span>
+              <span className="text-sm text-muted-foreground">Get ready...</span>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Stats */}
       <div className="px-4 pt-[env(safe-area-inset-top,12px)] pb-2 space-y-2 shrink-0">
-        <div className="text-center pt-2">
+        {/* Live indicator */}
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+          <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Live tracking</span>
+        </div>
+
+        <div className="text-center">
           <span className="font-label text-muted-foreground block mb-0.5">Duration</span>
           <span className="font-mono-stats text-5xl sm:text-6xl text-foreground">{formatTime(seconds)}</span>
         </div>
 
-        {/* Primary stats row */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="glass-card rounded-lg p-2.5 text-center">
+          <div className="glass-card rounded-xl p-2.5 text-center">
             <span className="font-label text-muted-foreground block mb-0.5">Distance</span>
             <span className="font-mono-stats text-2xl text-foreground">{distance.toFixed(2)}</span>
             <span className="text-xs text-muted-foreground ml-1">km</span>
           </div>
-          <div className="glass-card rounded-lg p-2.5 text-center">
+          <div className="glass-card rounded-xl p-2.5 text-center">
             <span className="font-label text-muted-foreground block mb-0.5">Pace</span>
             <span className="font-mono-stats text-2xl text-foreground">
               {pace}'{paceSeconds.toString().padStart(2, "0")}"
@@ -137,23 +165,22 @@ const RunningScreen = () => {
           </div>
         </div>
 
-        {/* Secondary stats row */}
         <div className="grid grid-cols-3 gap-2">
-          <div className="glass-card rounded-lg p-2 text-center">
+          <div className="glass-card rounded-xl p-2 text-center">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Flame size={12} className="text-destructive" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Cal</span>
             </div>
             <span className="font-mono-stats text-lg text-foreground">{calories}</span>
           </div>
-          <div className="glass-card rounded-lg p-2 text-center">
+          <div className="glass-card rounded-xl p-2 text-center">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Zap size={12} className="text-primary" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Cadence</span>
             </div>
             <span className="font-mono-stats text-lg text-foreground">{cadence}</span>
           </div>
-          <div className="glass-card rounded-lg p-2 text-center">
+          <div className="glass-card rounded-xl p-2 text-center">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <TrendingUp size={12} className="text-accent" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">km/h</span>
@@ -164,7 +191,7 @@ const RunningScreen = () => {
       </div>
 
       {/* Map */}
-      <div className="flex-1 mx-4 rounded-lg overflow-hidden relative min-h-0">
+      <div className="flex-1 mx-4 rounded-xl overflow-hidden relative min-h-0">
         {position ? (
           <RunMap center={position} zoom={16} showUserMarker followUser routePositions={routePositions} />
         ) : (
@@ -191,8 +218,7 @@ const RunningScreen = () => {
             onTouchStart={handleStopDown}
             onTouchEnd={handleStopUp}
             whileTap={{ scale: 0.96 }}
-            className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-destructive flex items-center justify-center btn-press relative overflow-hidden"
-            style={{ width: 72, height: 72 }}
+            className="w-[72px] h-[72px] rounded-full bg-destructive flex items-center justify-center btn-press relative overflow-hidden"
           >
             {stopProgress > 0 && (
               <div
@@ -204,7 +230,9 @@ const RunningScreen = () => {
             )}
             <Square size={24} className="text-foreground relative z-10" />
           </motion.button>
-          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Hold to stop</span>
+          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap flex items-center gap-1">
+            <Lock size={8} /> Hold to stop
+          </span>
         </div>
       </div>
     </div>

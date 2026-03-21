@@ -44,6 +44,45 @@ export type Database = {
         }
         Relationships: []
       }
+      runs: {
+        Row: {
+          avg_pace_min_per_km: number | null
+          avg_speed_kmh: number | null
+          calories: number
+          created_at: string
+          distance_km: number
+          duration_seconds: number
+          id: string
+          route: Json | null
+          steps: number
+          user_id: string
+        }
+        Insert: {
+          avg_pace_min_per_km?: number | null
+          avg_speed_kmh?: number | null
+          calories?: number
+          created_at?: string
+          distance_km?: number
+          duration_seconds?: number
+          id?: string
+          route?: Json | null
+          steps?: number
+          user_id: string
+        }
+        Update: {
+          avg_pace_min_per_km?: number | null
+          avg_speed_kmh?: number | null
+          calories?: number
+          created_at?: string
+          distance_km?: number
+          duration_seconds?: number
+          id?: string
+          route?: Json | null
+          steps?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

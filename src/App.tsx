@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import BottomNav from "@/components/BottomNav";
 import HomeScreen from "./pages/HomeScreen";
 import RunningScreen from "./pages/RunningScreen";
+import RunSummaryScreen from "./pages/RunSummaryScreen";
 import NearbyScreen from "./pages/NearbyScreen";
 import ActivityScreen from "./pages/ActivityScreen";
 import ProfileScreen from "./pages/ProfileScreen";
